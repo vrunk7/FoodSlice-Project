@@ -1,0 +1,45 @@
+<div th:fragment="admin_sidebar(currentPage)" class="sidebar d-none d-md-block">
+    
+    <h3 class="fw-bold mb-5 ps-2 text-warning">
+        <i class="fas fa-leaf"></i> Admin Panel
+    </h3>
+    
+    <nav class="nav flex-column">
+        
+        <a class="nav-link" 
+           th:classappend="${currentPage == 'inventory'} ? 'active' : ''" 
+           href="/admin/dashboard">
+            <i class="fas fa-box me-2"></i> Inventory
+        </a>
+        
+        <a class="nav-link" 
+           th:classappend="${currentPage == 'orders'} ? 'active' : ''" 
+           href="/admin/orders">
+            <i class="fas fa-truck me-2"></i> Dispatch Orders
+        </a>
+        
+        <a class="nav-link text-muted" href="#">
+            <i class="fas fa-chart-line me-2"></i> Analytics (Soon)
+        </a>
+        
+        <a class="nav-link text-muted" href="#">
+            <i class="fas fa-users me-2"></i> Customers (Soon)
+        </a>
+
+        <div class="mt-5 pt-4 border-top border-secondary">
+            <small class="text-uppercase text-muted fw-bold ls-1">Testing Zone</small>
+            <a th:href="@{/dashboard(username=${username})}" class="btn btn-outline-warning w-100 btn-sm mt-3 text-start">
+                <i class="fas fa-eye me-2"></i> View As User
+            </a>
+            <div class="mt-2 text-muted small fst-italic">
+                <i class="fas fa-info-circle"></i> Switches to User App view for testing.
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <a class="nav-link text-danger" href="/logout">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </nav>
+</div>

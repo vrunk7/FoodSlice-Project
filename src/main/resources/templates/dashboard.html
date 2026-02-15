@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>FoodApp Pro</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
+        .sidebar { height: 100vh; position: fixed; top: 0; left: 0; width: 250px; background: white; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.05); }
+        .nav-link { color: #6c757d; margin-bottom: 10px; padding: 12px; border-radius: 10px; font-weight: 500; transition: 0.3s; }
+        .nav-link:hover, .nav-link.active { background-color: #e8f5e9; color: #2e7d32; }
+        .main-content { margin-left: 250px; padding: 30px; }
+        .category-pill { background: white; border: 1px solid #eee; padding: 10px 20px; border-radius: 25px; margin-right: 10px; cursor: pointer; transition: 0.2s; font-weight: 600; color: #555; }
+        .category-pill:hover, .category-pill.active { background: #2e7d32; color: white; border-color: #2e7d32; }
+        
+        /* CARD STYLING */
+        .food-card { border: none; border-radius: 20px; transition: 0.3s; background: white; overflow: hidden; cursor: pointer; }
+        .food-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+        .food-img-container { height: 180px; overflow: hidden; position: relative; }
+        .food-img-container img { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* Wishlist Heart Animation */
+        .wishlist-btn { position: absolute; top: 15px; right: 15px; background: white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: 0.2s; z-index: 10; }
+        .wishlist-btn:hover { background: #ffebee; color: red; transform: scale(1.1); }
+        .wishlist-btn.active { color: red; }
+
+        .price-tag { position: absolute; bottom: 15px; left: 15px; background: rgba(0,0,0,0.7); color: white; padding: 5px 12px; border-radius: 15px; font-weight: bold; backdrop-filter: blur(4px); }
+    </style>
+</head>
+<body>
+	<div class="offcanvas offcanvas-end" tabindex="-1" id="cartSidebar">
+	        <div class="offcanvas-header bg-dark text-white">
+	            <h5 class="offcanvas-title"><i class="fas fa-shopping-basket"></i> Your Cart</h5>
+	            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+	        </div>
+	        <div class="offcanvas-body d-flex flex-column">
+	            <div id="cartItemsContainer" class="flex-grow-1 overflow-auto mb-3">
+	                <div class="text-center text-muted mt-5">
+	                    <i class="fas fa-hamburger fa-3x mb-3"></i>
+	                    <p>Your cart is empty!</p>
+	                </div>
+	            </div>
+	            
+	            <div class="border-top pt-3">
+	                <div class="d-flex justify-content-between mb-3 fw-bold fs-5">
+	                    <span>Total:</span>
+	                    <span id="cartTotal">₹0</span>
+	                </div>
+	                <a th:href="@{/checkout(username=${username})}" class="btn btn-success w-100 py-2 fw-bold">
+	                    PROCEED TO CHECKOUT
+	                </a>
+	            </div>
+	        </div>
+	    </div>
+
+	    <button class="btn btn-dark rounded-circle position-fixed bottom-0 end-0 m-4 shadow-lg p-3" 
+	            style="width: 60px; height: 60px; z-index: 1000;" 
+	            data-bs-toggle="offcanvas" data-bs-target="#cartSidebar">
+	        <i class="fas fa-shopping-cart"></i>
+	        <span id="cartBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
+	    </button>
+		
+    <div class="sidebar d-none d-md-block">
+        <h3 class="fw-bold mb-5 ps-2" style="color: #2e7d32;"><i class="fas fa-leaf"></i> FoodSlice</h3>
+        <nav class="nav flex-column">
+            <a class="nav-link active" href="/dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+            <a class="nav-link" href="/my-orders"><i class="fas fa-receipt"></i> Order History</a>
+			<a class="nav-link" th:href="@{/wishlist(username=${username})}"><i class="fas fa-heart"></i> Favorites</a>
+			<a class="nav-link" href="#" data-bs-toggle="offcanvas" data-bs-target="#profileSidebar">
+			    <i class="fas fa-wallet"></i> Wallet
+			</a>
+            <div class="mt-5"><a class="nav-link text-danger" href="/"><i class="fas fa-sign-out-alt"></i> Logout</a></div>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div><h2 class="fw-bold">Welcome, <span th:text="${username}">User</span>! 👋</h2></div>
+            <form action="/dashboard" method="get" class="d-flex align-items-center">
+                <input type="hidden" name="username" th:value="${username}">
+                <div class="input-group me-3" style="width: 300px;">
+                    <button class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></button>
+                    <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Search food...">
+                </div>
+				<img th:src="'https://ui-avatars.com/api/?name=' + ${username} + '&background=random'" 
+				     class="rounded-circle border border-2 border-success" 
+				     width="45" 
+				     style="cursor: pointer;"
+				     data-bs-toggle="offcanvas" 
+				     data-bs-target="#profileSidebar">
+			</form>
+        </div>
+
+        <div th:if="${msg}" class="alert alert-success border-0 shadow-sm" style="border-left: 5px solid #2e7d32;">
+            <i class="fas fa-check-circle me-2"></i> <span th:text="${msg}"></span>
+        </div>
+
+        <div class="d-flex mb-4 overflow-auto pb-2">
+            <a th:href="@{/dashboard(username=${username}, category='All')}" class="text-decoration-none"><div class="category-pill" th:classappend="${currentCategory == 'All' ? 'active' : ''}">🍔 All</div></a>
+            <a th:href="@{/dashboard(username=${username}, category='Veg')}" class="text-decoration-none"><div class="category-pill" th:classappend="${currentCategory == 'Veg' ? 'active' : ''}">🥗 Veg</div></a>
+            <a th:href="@{/dashboard(username=${username}, category='Non-Veg')}" class="text-decoration-none"><div class="category-pill" th:classappend="${currentCategory == 'Non-Veg' ? 'active' : ''}">🍗 Non-Veg</div></a>
+            <a th:href="@{/dashboard(username=${username}, category='Drinks')}" class="text-decoration-none"><div class="category-pill" th:classappend="${currentCategory == 'Drinks' ? 'active' : ''}">🥤 Drinks</div></a>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-4" th:each="product : ${products}">
+			<!---	<div class="food-card h-100 p-3" 
+				     th:onclick="|openProductModal('${product.name}', '${product.description}', ${product.price}, '${product.imageUrl}', '${product.category}')|">    
+                    <div class="food-img-container rounded-4 mb-3 position-relative">
+                        <img th:src="${product.imageUrl}" alt="Food">
+                        <span class="price-tag" th:text="'₹' + ${product.price}">₹0</span>
+                        
+						<div class="wishlist-btn" 
+						     th:classappend="${wishlistProductIds != null and wishlistProductIds.contains(product.id)} ? 'active' : ''"
+						     th:onclick="toggleHeart(this, event, [[${product.id}]], [[${product.name}]], [[${product.price}]], [[${product.imageUrl}]])">
+						    
+						    <i th:class="${wishlistProductIds != null and wishlistProductIds.contains(product.id)} ? 'fas fa-heart' : 'far fa-heart'"></i>
+						</div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <h5 class="fw-bold mb-1" th:text="${product.name}">Food Name</h5>
+                            <small class="text-muted" th:text="${product.category}">Category</small>
+                        </div>
+                        <span class="text-warning small"><i class="fas fa-star"></i> 4.8</span>
+                    </div>
+					-->
+				    <div class="food-card h-100 p-3" 
+					     th:data-name="${product.name}"
+					     th:data-desc="${product.description}"
+					     th:data-price="${product.price}"
+					     th:data-img="${product.imageUrl}"
+					     th:data-cat="${product.category}"
+					     onclick="openProductModalSecure(this)">
+					    
+					    <div class="food-img-container rounded-4 mb-3 position-relative">
+					        <img th:src="${product.imageUrl}" alt="Food">
+					        <span class="price-tag" th:text="'₹' + ${product.price}">₹0</span>
+					        
+					        <div class="wishlist-btn" 
+					             th:classappend="${wishlistProductIds != null and wishlistProductIds.contains(product.id)} ? 'active' : ''"
+					             th:onclick="toggleHeart(this, event, [[${product.id}]], [[${product.name}]], [[${product.price}]], [[${product.imageUrl}]])">
+					            <i th:class="${wishlistProductIds != null and wishlistProductIds.contains(product.id)} ? 'fas fa-heart' : 'far fa-heart'"></i>
+					        </div>
+					    </div>
+					    
+					    <div class="d-flex justify-content-between align-items-start mb-2">
+					        <div>
+					            <h5 class="fw-bold mb-1" th:text="${product.name}">Name</h5>
+					            <small class="text-muted" th:text="${product.category}">Category</small>
+					        </div>
+					        <span class="text-warning small"><i class="fas fa-star"></i> 4.8</span>
+					    </div>
+                    <p class="text-muted small mb-0 text-truncate">Click to see details & reviews...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="productModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 overflow-hidden">
+                <div class="position-relative" style="height: 200px;">
+                    <img id="modalImg" src="" class="w-100 h-100 object-fit-cover">
+                    <button type="button" class="btn-close position-absolute top-0 end-0 m-3 bg-white p-2" data-bs-dismiss="modal"></button>
+                    <span id="modalCategory" class="badge bg-dark position-absolute bottom-0 start-0 m-3">Category</span>
+                </div>
+                
+                <div class="modal-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h3 id="modalName" class="fw-bold mb-0">Food Name</h3>
+                        <h4 id="modalPrice" class="text-success fw-bold mb-0">₹0</h4>
+                    </div>
+                    
+                    <p id="modalDesc" class="text-muted mb-4">Description goes here...</p>
+
+                    <ul class="nav nav-tabs mb-3" id="myTab" role="tablist">
+                        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#ingredients" type="button">Ingredients</button></li>
+                        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#reviews" type="button">Reviews (3)</button></li>
+                    </ul>
+                    <div class="tab-content mb-4">
+                        <div class="tab-pane fade show active text-small text-muted" id="ingredients">
+                            Freshly sourced organic vegetables, house-secret spices, olive oil, and premium cheese. Contains dairy and gluten.
+                        </div>
+                        <div class="tab-pane fade" id="reviews">
+                            <div class="mb-2"><small><b>Rahul K.</b> ⭐⭐⭐⭐⭐<br>Absolutely delicious! Best I've had.</small></div>
+                            <div class="mb-2"><small><b>Priya S.</b> ⭐⭐⭐⭐<br>Very tasty but spicy.</small></div>
+                        </div>
+                    </div>
+
+                    <!--<form action="/order" method="post">-->
+                        <input type="hidden" name="username" th:value="${username}">
+                        <input type="hidden" id="formPrice" name="price" value="">
+                        
+						<div class="d-flex align-items-center justify-content-between bg-light p-3 rounded-3">
+						        <div class="d-flex align-items-center bg-white rounded-pill border px-2">
+						            <button type="button" class="btn btn-sm text-secondary" onclick="updateQty(-1)"><i class="fas fa-minus"></i></button>
+						            <input type="text" id="qtyInput" value="1" class="form-control border-0 text-center p-0" style="width: 30px;" readonly>
+						            <button type="button" class="btn btn-sm text-success" onclick="updateQty(1)"><i class="fas fa-plus"></i></button>
+						        </div>
+						        
+						        <button type="button" class="btn btn-success px-4 rounded-pill fw-bold" onclick="addToCart()">
+						            Add to Cart - <span id="btnTotal">₹0</span>
+						        </button>
+						    </div>
+                        </div>
+                  <!--  </form> -->
+                </div>
+            </div>
+        </div>
+    </div>
+	<div class="offcanvas offcanvas-start border-0" tabindex="-1" id="profileSidebar" style="width: 350px;">
+	    <div class="offcanvas-header bg-success text-white py-4">
+	        <h5 class="offcanvas-title fw-bold"><i class="fas fa-user-circle me-2"></i> My Account</h5>
+	        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+	    </div>
+	    <div class="offcanvas-body">
+	        <div class="text-center mb-4">
+	            <img th:src="'https://ui-avatars.com/api/?name=' + ${username} + '&background=random&size=128'" 
+	                 class="rounded-circle shadow-sm border border-3 border-white mb-2" width="100">
+	            <h4 class="fw-bold mb-0" th:text="${username}">Username</h4>
+	            <span class="badge bg-success-subtle text-success rounded-pill">Premium Member</span>
+	        </div>
+	        
+			<ul class="list-group list-group-flush">
+			    <li class="list-group-item border-0 px-0">
+			        <div class="d-flex justify-content-between align-items-center">
+			            <span class="text-muted">Wallet Balance</span>
+			            <span class="fw-bold text-success" th:text="'₹' + ${walletBalance}">₹1000</span>
+			        </div>
+			        <div class="text-end mt-2">
+			            <button class="btn btn-sm btn-outline-success rounded-pill px-3" 
+			                    data-bs-toggle="modal" data-bs-target="#topUpModal">
+			                <i class="fas fa-plus-circle me-1"></i> Deposit
+			            </button>
+			        </div>
+			    </li>
+			    <li class="list-group-item border-0 px-0">
+			        <small class="text-muted d-block">Default Address</small>
+			        <span class="small" th:text="${userAddress != null ? userAddress : '123, Mumbai Central, Mumbai'}">Mumbai</span>
+			    </li>
+			</ul>
+	        
+	        <div class="mt-5">
+	            <a href="/my-orders" class="btn btn-light w-100 mb-2 rounded-3 text-start"><i class="fas fa-box me-2"></i> My Orders</a>
+	            <a th:href="@{/wishlist(username=${username})}" class="btn btn-light w-100 mb-4 rounded-3 text-start"><i class="fas fa-heart me-2"></i> Wishlist</a>
+	            <a href="/" class="btn btn-danger w-100 rounded-3 fw-bold">Logout</a>
+	        </div>
+	    </div>
+	</div>
+	
+	<div class="modal fade" id="topUpModal" tabindex="-1" aria-hidden="true">
+	    <div class="modal-dialog modal-sm modal-dialog-centered">
+	        <div class="modal-content rounded-4 border-0 shadow">
+	            <div class="modal-header border-0 pb-0">
+	                <h6 class="fw-bold mb-0">Top Up Wallet</h6>
+	                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+	            </div>
+	            <form action="/wallet/add" method="POST">
+	                <div class="modal-body">
+	                    <input type="hidden" name="username" th:value="${username}">
+	                    <div class="mb-3">
+	                        <label class="form-label small text-muted">Enter Amount (₹)</label>
+	                        <div class="input-group">
+	                            <span class="input-group-text bg-white border-end-0">₹</span>
+	                            <input type="number" name="amount" class="form-control border-start-0 fw-bold" value="500" min="10" required>
+	                        </div>
+	                    </div>
+	                </div>
+	                <div class="modal-footer border-0 pt-0">
+	                    <button type="submit" class="btn btn-success w-100 rounded-pill fw-bold">Confirm & Pay</button>
+	                </div>
+	            </form>
+	        </div>
+	    </div>
+	</div>
+	
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentPrice = 0;
+
+		// --- CART LOGIC ---
+		        let cart = JSON.parse(localStorage.getItem('foodCart')) || []; // Load saved cart
+		        let currentProduct = {}; // Temp store for modal
+
+		        // Update Modal Open to store current product data
+		        function openProductModal(name, desc, price, img, category) {
+		            currentProduct = { name, price, img }; // Save for later
+		            
+		            document.getElementById('modalName').innerText = name;
+		            document.getElementById('modalDesc').innerText = desc;
+		            document.getElementById('modalPrice').innerText = '₹' + price;
+		            document.getElementById('modalImg').src = img;
+		            document.getElementById('modalCategory').innerText = category;
+		            
+		            document.getElementById('qtyInput').value = 1;
+		            currentPrice = price;
+		            updateBtnTotal();
+		            new bootstrap.Modal(document.getElementById('productModal')).show();
+		        }
+
+		        // Add Item to Local Storage
+		        function addToCart() {
+		            let qty = parseInt(document.getElementById('qtyInput').value);
+		            
+		            // Check if item already exists
+		            let existing = cart.find(item => item.name === currentProduct.name);
+		            if (existing) {
+		                existing.qty += qty;
+		            } else {
+		                cart.push({ 
+		                    name: currentProduct.name, 
+		                    price: currentProduct.price, 
+		                    img: currentProduct.img, 
+		                    qty: qty 
+		                });
+		            }
+
+		            // Save and Close
+		            localStorage.setItem('foodCart', JSON.stringify(cart));
+		            updateCartUI();
+		            
+		            // Close Modal manually
+		            bootstrap.Modal.getInstance(document.getElementById('productModal')).hide();
+		            
+		            // Open Cart Sidebar to show user
+		            new bootstrap.Offcanvas(document.getElementById('cartSidebar')).show();
+		        }
+
+		        // Render Cart Items in Sidebar
+		        function updateCartUI() {
+		            let container = document.getElementById('cartItemsContainer');
+		            let total = 0;
+		            let count = 0;
+		            
+		            if (cart.length === 0) {
+		                container.innerHTML = '<div class="text-center text-muted mt-5"><p>Empty!</p></div>';
+		                document.getElementById('cartBadge').innerText = 0;
+		                document.getElementById('cartTotal').innerText = '₹0';
+		                return;
+		            }
+
+		            let html = '';
+		            cart.forEach((item, index) => {
+		                let itemTotal = item.price * item.qty;
+		                total += itemTotal;
+		                count += item.qty;
+		                
+		                html += `
+		                    <div class="d-flex align-items-center mb-3 border-bottom pb-2">
+		                        <img src="${item.img}" class="rounded" width="50" height="50" style="object-fit:cover;">
+		                        <div class="ms-3 flex-grow-1">
+		                            <h6 class="mb-0 small fw-bold">${item.name}</h6>
+		                            <small class="text-muted">₹${item.price} x ${item.qty}</small>
+		                        </div>
+		                        <div class="text-end">
+		                            <span class="d-block fw-bold text-success small">₹${itemTotal}</span>
+		                            <i class="fas fa-trash text-danger small" style="cursor:pointer;" onclick="removeFromCart(${index})"></i>
+		                        </div>
+		                    </div>
+		                `;
+		            });
+
+		            container.innerHTML = html;
+		            document.getElementById('cartTotal').innerText = '₹' + total;
+		            document.getElementById('cartBadge').innerText = count;
+		        }
+
+		        function removeFromCart(index) {
+		            cart.splice(index, 1);
+		            localStorage.setItem('foodCart', JSON.stringify(cart));
+		            updateCartUI();
+		        }
+
+		        // Load Cart on Page Load
+		        updateCartUI();
+		
+		
+     /*   function openProductModal(name, desc, price, img, category) {
+            // Fill data into Modal
+            document.getElementById('modalName').innerText = name;
+            document.getElementById('modalDesc').innerText = desc;
+            document.getElementById('modalPrice').innerText = '₹' + price;
+            document.getElementById('modalImg').src = img;
+            document.getElementById('modalCategory').innerText = category;
+            
+            // Setup Form Data
+            document.getElementById('formPrice').value = price;
+            currentPrice = price;
+            
+            // Reset Quantity
+            document.getElementById('qtyInput').value = 1;
+            updateBtnTotal();
+
+            // Show Modal
+            new bootstrap.Modal(document.getElementById('productModal')).show();
+        } */
+		
+		function openProductModalSecure(element) {
+		    // Read the data attributes from the clicked element
+		    let name = element.getAttribute('data-name');
+		    let desc = element.getAttribute('data-desc');
+		    let price = parseFloat(element.getAttribute('data-price'));
+		    let img = element.getAttribute('data-img');
+		    let category = element.getAttribute('data-cat');
+
+		    // Store in our global currentProduct object for the cart
+		    currentProduct = { name, price, img };
+
+		    // Fill the Modal UI
+		    document.getElementById('modalName').innerText = name;
+		    document.getElementById('modalDesc').innerText = desc;
+		    document.getElementById('modalPrice').innerText = '₹' + price;
+		    document.getElementById('modalImg').src = img;
+		    document.getElementById('modalCategory').innerText = category;
+		    
+		    // Setup Form/Calculation logic
+		    document.getElementById('formPrice').value = price;
+		    currentPrice = price;
+		    document.getElementById('qtyInput').value = 1;
+		    updateBtnTotal();
+
+		    // Show the modal
+		    new bootstrap.Modal(document.getElementById('productModal')).show();
+		}
+
+        function updateQty(change) {
+            let input = document.getElementById('qtyInput');
+            let newVal = parseInt(input.value) + change;
+            if (newVal >= 1 && newVal <= 10) {
+                input.value = newVal;
+                updateBtnTotal();
+            }
+        }
+
+        function updateBtnTotal() {
+            let qty = parseInt(document.getElementById('qtyInput').value);
+            document.getElementById('btnTotal').innerText = '₹' + (currentPrice * qty);
+        }
+
+		// UPDATED: Heart Toggle with Server Sync
+		        function toggleHeart(btn, event, productId, name, price, img) {
+		            event.stopPropagation(); // Don't open modal
+		            
+		            // 1. Get Username (We hid it in the HTML earlier)
+		            let username = document.querySelector('input[name="username"]').value;
+
+		            // 2. Prepare Data
+		            let data = {
+		                username: username,
+		                productId: productId,
+		                productName: name,
+		                price: price,
+		                imageUrl: img
+		            };
+
+		            // 3. Send to Server (AJAX)
+		            fetch('/api/wishlist/toggle', {
+		                method: 'POST',
+		                headers: { 'Content-Type': 'application/json' },
+		                body: JSON.stringify(data)
+		            })
+		            .then(response => response.text())
+		            .then(status => {
+		                // 4. Update UI based on Server Response
+		                if (status === "ADDED") {
+		                    btn.classList.add('active');
+		                    btn.querySelector('i').classList.remove('far');
+		                    btn.querySelector('i').classList.add('fas');
+		                    // Optional: Show a tiny toast notification
+		                    // alert("Added to Wishlist!"); 
+		                } else {
+		                    btn.classList.remove('active');
+		                    btn.querySelector('i').classList.remove('fas');
+		                    btn.querySelector('i').classList.add('far');
+		                }
+		            })
+		            .catch(err => console.error("Error:", err));
+		        }
+    </script>
+</body>
+</html>

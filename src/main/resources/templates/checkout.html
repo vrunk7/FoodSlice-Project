@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Checkout | FoodSlice</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .checkout-card { border-radius: 15px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .payment-option { border: 2px solid #eee; border-radius: 12px; padding: 15px; cursor: pointer; transition: 0.3s; }
+        .payment-option:hover, .payment-option.active { border-color: #2e7d32; background: #e8f5e9; }
+    </style>
+</head>
+<body>
+
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-md-8">
+                <h3 class="fw-bold mb-4">Checkout</h3>
+                
+                <div class="card checkout-card p-4 mb-4">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-map-marker-alt text-danger"></i> Delivery Address</h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <p class="mb-0 text-muted" th:text="${user.address}">Loading address...</p>
+                        <button class="btn btn-sm btn-outline-primary">Change</button>
+                    </div>
+                </div>
+
+                <div class="card checkout-card p-4">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-credit-card text-success"></i> Payment Method</h5>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="payment-option text-center active" onclick="selectPayment('CASH')">
+                                <i class="fas fa-money-bill-wave fa-2x mb-2 text-success"></i>
+                                <h6>Cash</h6>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="payment-option text-center" onclick="selectPayment('CARD')">
+                                <i class="fas fa-university fa-2x mb-2 text-primary"></i>
+                                <h6>Net Banking</h6>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="payment-option text-center" onclick="selectPayment('UPI')">
+                                <i class="fas fa-mobile-alt fa-2x mb-2 text-info"></i>
+                                <h6>UPI</h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card checkout-card p-4">
+                    <h5 class="fw-bold mb-4">Your Order</h5>
+                    <div id="cartItems">
+                        </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal</span>
+                        <span id="subtotal">₹0</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Delivery Fee</span>
+                        <span class="text-success">FREE</span>
+                    </div>
+                    <div class="d-flex justify-content-between fw-bold fs-5 mt-3">
+                        <span>Total Amount</span>
+                        <span id="total">₹0</span>
+                    </div>
+                    
+                    <button class="btn btn-success w-100 mt-4 py-3 fw-bold rounded-pill" onclick="processOrder()">
+                        PLACE ORDER NOW
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+	<script>
+	        // Load Cart Logic
+	        let cart = JSON.parse(localStorage.getItem('foodCart')) || [];
+	        let totalAmount = 0;
+
+	        function loadCheckoutItems() {
+	            let container = document.getElementById('cartItems');
+	            let subtotalEl = document.getElementById('subtotal');
+	            let totalEl = document.getElementById('total');
+	            
+	            if (cart.length === 0) {
+	                container.innerHTML = '<p class="text-danger">Cart is empty!</p>';
+	                return;
+	            }
+
+	            let html = '';
+	            totalAmount = 0;
+
+	            cart.forEach(item => {
+	                let itemTotal = item.price * item.qty;
+	                totalAmount += itemTotal;
+	                
+	                html += `
+	                    <div class="d-flex justify-content-between align-items-center mb-2">
+	                        <div class="d-flex align-items-center">
+	                            <span class="badge bg-secondary me-2">${item.qty}x</span>
+	                            <span>${item.name}</span>
+	                        </div>
+	                        <span>₹${itemTotal}</span>
+	                    </div>
+	                `;
+	            });
+
+	            container.innerHTML = html;
+	            subtotalEl.innerText = '₹' + totalAmount;
+	            totalEl.innerText = '₹' + totalAmount;
+	        }
+
+	        // Payment Selection Visuals
+	        let selectedPayment = 'CASH';
+	        function selectPayment(type) {
+	            selectedPayment = type;
+	            document.querySelectorAll('.payment-option').forEach(el => el.classList.remove('active'));
+	            event.currentTarget.classList.add('active');
+	        }
+
+	        // FINAL STEP: Process Order
+	        function processOrder() {
+	            if(cart.length === 0) {
+	                alert("Cart is empty!");
+	                return;
+	            }
+
+	            // Here we would normally loop through items and send them to backend
+	            // For the demo, we send the TOTAL amount as one order
+	            
+	            // 1. Get Username from URL
+	            const urlParams = new URLSearchParams(window.location.search);
+	            const username = urlParams.get('username');
+
+	            // 2. Submit Form (Dynamic)
+	            let form = document.createElement('form');
+	            form.method = 'POST';
+	            form.action = '/order'; // Calls your existing Order API
+
+	            let uInput = document.createElement('input');
+	            uInput.name = 'username';
+	            uInput.value = username;
+	            form.appendChild(uInput);
+
+	            let pInput = document.createElement('input');
+	            pInput.name = 'price';
+	            pInput.value = totalAmount; // Send the Grand Total
+	            form.appendChild(pInput);
+	            
+	            let qInput = document.createElement('input');
+	            qInput.name = 'quantity';
+	            qInput.value = 1; // It's one "Basket" of items
+	            form.appendChild(qInput);
+
+				let mInput = document.createElement('input');
+				    mInput.type = 'hidden';
+				    mInput.name = 'paymentMethod';
+				    mInput.value = selectedPayment; // This variable is updated by selectPayment()
+				    form.appendChild(mInput);
+				
+	            document.body.appendChild(form);
+	            
+	            // Clear Cart before submitting
+	            localStorage.removeItem('foodCart');
+	            
+	            form.submit();
+	        }
+
+	        // Initialize
+	        loadCheckoutItems();
+	    </script>
+</body>
+</html>

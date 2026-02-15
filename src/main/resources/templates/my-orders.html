@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>My Orders | FoodSlice</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
+        
+        /* 1. SIDEBAR STYLE (Fixed to left) */
+        .sidebar { height: 100vh; position: fixed; top: 0; left: 0; width: 250px; background: white; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.05); }
+        .nav-link { color: #6c757d; margin-bottom: 10px; padding: 12px; border-radius: 10px; font-weight: 500; transition: 0.3s; }
+        .nav-link:hover, .nav-link.active { background-color: #e8f5e9; color: #2e7d32; }
+        
+        /* 2. MAIN CONTENT STYLE (Pushed right by exactly 250px) */
+        .main-content { margin-left: 250px; padding: 40px; }
+        
+        /* Card Styles */
+        .order-card { border: none; border-radius: 15px; background: white; transition: 0.3s; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+        .order-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
+    </style>
+</head>
+<body>
+
+    <div th:replace="~{fragments/sidebar :: sidebar(currentPage='orders')}"></div>
+
+    <div class="main-content">
+        
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h2 class="fw-bold text-dark"><i class="fas fa-receipt text-success me-2"></i>My Order History</h2>
+                <p class="text-muted mb-0">Track your past and current food orders.</p>
+            </div>
+            <span class="badge bg-white text-success border border-success p-2 shadow-sm rounded-pill">
+                Total Orders: <span th:text="${#lists.size(orders)}" class="fw-bold">0</span>
+            </span>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-4" th:each="order : ${orders}">
+                <div class="card order-card h-100">
+                    <div class="card-header bg-white border-0 pt-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted small fw-bold mb-0">ORDER ID</p>
+                            <h6 class="fw-bold text-dark" th:text="'#FSA-' + ${order.id}">#FSA-1</h6>
+                        </div>
+                        <div class="text-end">
+                            <span th:class="${order.status == 'PAID' ? 'badge bg-success-subtle text-success border border-success' : 'badge bg-warning-subtle text-warning border border-warning'}" 
+                                  th:text="${order.status}">Status</span>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-light rounded-circle p-3 me-3 text-success">
+                                <i class="fas fa-utensils fa-lg"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold">Food Selection</h6>
+                                <small class="text-muted" th:text="${order.orderDate}">Jan 28, 2026</small>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-3 mt-3">
+                            <span class="text-muted small"><i class="fas fa-wallet me-1"></i> Paid via Wallet</span>
+                            <span class="fw-bold text-success fs-5" th:text="'₹' + ${order.totalAmount}">₹0</span>
+                        </div>
+                    </div>
+
+                    <div class="card-footer bg-white border-0 pb-3 pt-0">
+                        <button class="btn btn-outline-success btn-sm w-100 rounded-pill fw-bold mt-2">
+                            <i class="fas fa-file-invoice me-1"></i> DOWNLOAD INVOICE
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(orders)}" class="text-center py-5 col-12">
+                <div class="bg-white p-5 rounded-4 shadow-sm d-inline-block">
+                    <i class="fas fa-box-open fa-4x text-muted opacity-25 mb-3"></i>
+                    <h4 class="text-muted fw-bold">No orders found yet!</h4>
+                    <a href="/dashboard" class="btn btn-success px-4 py-2 rounded-pill fw-bold">
+                        <i class="fas fa-utensils me-2"></i>Order Something Now
+                    </a>
+                </div>
+            </div>
+
+        </div> </div> </body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>My Wishlist | FoodSlice</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
+        
+        /* Sidebar Styling */
+        .sidebar { height: 100vh; position: fixed; top: 0; left: 0; width: 250px; background: white; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.05); }
+        .nav-link { color: #6c757d; margin-bottom: 10px; padding: 12px; border-radius: 10px; font-weight: 500; transition: 0.3s; }
+        .nav-link:hover, .nav-link.active { background-color: #e8f5e9; color: #2e7d32; }
+        
+        /* Main Content Layout */
+        .main-content { margin-left: 250px; padding: 40px; }
+        
+        /* Premium Food Card Styling (Matches Dashboard) */
+        .food-card { border: none; border-radius: 20px; transition: 0.3s; background: white; overflow: hidden; }
+        .food-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+        .food-img-container { height: 180px; overflow: hidden; position: relative; }
+        .food-img-container img { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* Remove Button Overlay */
+        .remove-btn { position: absolute; top: 15px; right: 15px; background: rgba(255, 255, 255, 0.9); width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: 0.2s; z-index: 10; cursor: pointer; color: #dc3545; }
+        .remove-btn:hover { background: #dc3545; color: white; transform: scale(1.1); }
+    </style>
+</head>
+<body>
+
+    <div th:replace="~{fragments/sidebar :: sidebar(currentPage='wishlist')}"></div>
+
+    <div class="main-content">
+        
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h2 class="fw-bold text-dark">
+                    <i class="fas fa-heart text-danger me-2"></i>My Wishlist
+                </h2>
+                <p class="text-muted mb-0">Your saved favorites waiting to be ordered.</p>
+            </div>
+            <span class="badge bg-white text-danger border border-danger p-2 shadow-sm rounded-pill">
+                Items: <span th:text="${#lists.size(wishlistItems)}" class="fw-bold">0</span>
+            </span>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-3 mb-4" th:each="item : ${wishlistItems}">
+                <div class="card food-card h-100 shadow-sm">
+                    
+                    <div class="remove-btn" title="Remove from Wishlist">
+                        <i class="fas fa-times"></i>
+                    </div>
+
+                    <div class="food-img-container">
+                        <img th:src="${item.imageUrl}" alt="Food Image">
+                    </div>
+
+                    <div class="card-body text-center p-3">
+                        <h6 class="fw-bold text-dark mb-1" th:text="${item.productName}">Delicious Burger</h6>
+                        <h5 class="text-success fw-bold mb-3" th:text="'₹' + ${item.price}">₹150</h5>
+                        
+                        <form action="/order" method="post">
+                            <input type="hidden" name="username" th:value="${username}">
+                            <input type="hidden" name="productName" th:value="${item.productName}"> 
+                            <input type="hidden" name="price" th:value="${item.price}">
+                            <input type="hidden" name="quantity" value="1">
+                            
+                            <button type="submit" class="btn btn-success w-100 rounded-pill fw-bold">
+                                <i class="fas fa-shopping-bag me-2"></i>Order Now
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(wishlistItems)}" class="col-12 text-center py-5">
+                <div class="bg-white p-5 rounded-4 shadow-sm d-inline-block">
+                    <i class="far fa-heart fa-4x text-muted opacity-25 mb-3"></i>
+                    <h4 class="text-muted fw-bold">Your wishlist is empty.</h4>
+                    <p class="text-muted mb-4">Save your favorite dishes here to order them quickly later!</p>
+                    <a href="/dashboard" class="btn btn-success px-4 py-2 rounded-pill fw-bold">
+                        <i class="fas fa-utensils me-2"></i>Explore Menu
+                    </a>
+                </div>
+            </div>
+
+        </div> </div> </body>
+</html>
