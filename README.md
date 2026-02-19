@@ -2,9 +2,7 @@
 
 FoodSlice is a robust, fault-tolerant food delivery application built using a **Microservices Architecture**. It separates user management, product inventory, and order processing into independent services to ensure scalability, data integrity, and high performance.
 
-
-
-[Image of Microservices Architecture Diagram]
+<img width="364" height="213" alt="Screenshot 2026-02-19 143041" src="https://github.com/user-attachments/assets/39c0e0da-b76a-4ac1-95d3-17861a1336a1" />
 
 
 ## Key Features
