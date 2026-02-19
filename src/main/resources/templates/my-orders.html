@@ -1,7 +1,179 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>My Orders | FoodSlice</title>
+    <title>FoodSlice | My Orders</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
+        
+        /* 1. FLEX LAYOUT (Matches Dashboard/Wishlist) */
+        .wrapper { display: flex; width: 100%; align-items: stretch; }
+        
+        /* Sidebar container (Prevents shrinking) */
+        .sidebar-container { height: 100vh; position: fixed; top: 0; left: 0; width: 250px; background: white; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.05); }
+		.nav-link { color: #6c757d; margin-bottom: 10px; padding: 12px; border-radius: 10px; font-weight: 500; transition: 0.3s; }
+		        .nav-link:hover, .nav-link.active { background-color: #e8f5e9; color: #2e7d32; }
+
+        .content-area { margin-left:250px; width: 100%; padding: 40px;}
+
+        /* Card Styles */
+        .order-card { border: none; border-radius: 15px; background: white; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .order-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+
+    <div class="sidebar-container">
+        <div th:replace="~{fragments/sidebar :: sidebar(currentPage='orders')}"></div>
+    </div>
+    
+    <div th:replace="~{fragments/wallet_sidebar :: wallet}"></div>
+
+    <div class="content-area">
+        <div class="container-fluid">
+            
+            <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+                <div>
+                    <h2 class="fw-bold text-dark"><i class="fas fa-receipt text-success me-2"></i>My Order History</h2>
+                    <p class="text-muted mb-0">Track your past and current food orders.</p>
+                </div>
+                <span class="badge bg-white text-success border border-success p-2 shadow-sm rounded-pill">
+                    Total: <span th:text="${orders != null ? #lists.size(orders) : 0}" class="fw-bold">0</span>
+                </span>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4" th:each="order : ${orders}">
+                    <div class="card order-card h-100">
+                        <div class="card-header bg-white border-0 pt-3 d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="text-muted small fw-bold mb-0">ORDER ID</p>
+                                <h6 class="fw-bold text-dark" th:text="'#ORD-' + ${order.id}">#ORD-1</h6>
+                            </div>
+                            
+                            <div class="d-flex flex-column align-items-end gap-1">
+                                
+                                <span class="badge rounded-pill px-2"
+                                      th:classappend="${order.status == 'PENDING' ? 'bg-warning text-dark' : 'bg-success'}"
+                                      style="font-size: 0.7rem;">
+                                    <i class="fas fa-rupee-sign me-1"></i>
+                                    <span th:text="${order.status == 'PENDING' ? 'PAYMENT PENDING' : 'PAID'}">PAID</span>
+                                </span>
+
+                                <span class="badge rounded-pill px-2"
+                                      th:classappend="${order.status == 'COOKING' ? 'bg-info text-dark' : 
+                                                      (order.status == 'DELIVERED' ? 'bg-success' : 'bg-secondary')}"
+                                      style="font-size: 0.7rem;">
+                                    <i class="fas fa-truck me-1"></i>
+                                    <span th:text="${order.status == 'COOKING' ? 'COOKING' : 
+                                                   (order.status == 'DELIVERED' ? 'DELIVERED' : 'ORDER PLACED')}">PLACED</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="progress mb-3" style="height: 6px;">
+                                <div class="progress-bar bg-success" role="progressbar" 
+                                     th:style="'width: ' + (${order.status == 'DELIVERED' ? '100%' : (order.status == 'COOKING' ? '60%' : '20%')})">
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light rounded-circle p-3 me-3 text-success">
+                                    <i class="fas fa-utensils fa-lg"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 fw-bold">Food Basket</h6>
+                                    <small class="text-muted" th:text="${order.orderDate}">Date</small>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-3 mt-3">
+                                <span class="text-muted small">Total Bill</span>
+                                <span class="fw-bold text-success fs-5" th:text="'₹' + ${order.totalAmount}">₹0</span>
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-white border-0 pb-3 pt-0">
+                            <button class="btn btn-outline-success btn-sm w-100 rounded-pill fw-bold mt-2"
+                                    th:onclick="printInvoice([[${order.id}]], [[${order.totalAmount}]], [[${order.status}]], [[${order.orderDate}]])">
+                                <i class="fas fa-file-invoice me-1"></i> VIEW INVOICE
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div th:if="${orders == null || #lists.isEmpty(orders)}" class="text-center py-5 col-12">
+                    <div class="bg-white p-5 rounded-4 shadow-sm d-inline-block">
+                        <i class="fas fa-box-open fa-4x text-muted opacity-25 mb-3"></i>
+                        <h4 class="text-muted fw-bold">No orders found!</h4>
+                        <a href="/dashboard" class="btn btn-success px-4 py-2 mt-3 rounded-pill fw-bold">
+                            <i class="fas fa-utensils me-2"></i>Order Something Now
+                        </a>
+                    </div>
+                </div>
+
+            </div> 
+        </div>
+    </div> 
+</div>
+
+<script>
+    function printInvoice(id, amount, status, date) {
+        let printWindow = window.open('', '', 'height=600,width=400');
+        
+        // Smart Logic for Mode Text
+        let payMode = (status === 'PENDING') ? 'CASH ON DELIVERY' : 'ONLINE / WALLET';
+        
+        let html = `
+            <html>
+            <head>
+                <title>Invoice #ORD-${id}</title>
+                <style>
+                    body { font-family: monospace; padding: 20px; text-align: center; }
+                    .header { border-bottom: 2px dashed #000; padding-bottom: 10px; margin-bottom: 20px; }
+                    .footer { border-top: 2px dashed #000; padding-top: 10px; margin-top: 20px; font-size: 12px; }
+                    .total { font-size: 20px; font-weight: bold; margin: 20px 0; }
+                    .status { border: 1px solid #000; padding: 5px; display: inline-block; margin-bottom: 10px; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h2>FOODSLICE</h2>
+                    <p>Mumbai, India</p>
+                    <p>--------------------------------</p>
+                    <h3>INVOICE</h3>
+                </div>
+                <p><strong>Order ID:</strong> #ORD-${id}</p>
+                <p><strong>Date:</strong> ${date}</p>
+                <div class="status">STATUS: ${status}</div>
+                <div class="total">TOTAL: ₹${amount}</div>
+                <p>Payment Mode: ${payMode}</p>
+                <div class="footer">
+                    <p>Thank you for ordering!</p>
+                    <p>www.foodslice.com</p>
+                </div>
+                <script>window.print();<\/script>
+            </body>
+            </html>
+        `;
+        
+        printWindow.document.write(html);
+        printWindow.document.close();
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+<!--
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>FoodSlice | My Orders</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -23,7 +195,7 @@
 <body>
 
     <div th:replace="~{fragments/sidebar :: sidebar(currentPage='orders')}"></div>
-
+	<div th:replace="~{fragments/wallet_sidebar :: wallet}"></div>
     <div class="main-content">
         
         <div class="d-flex justify-content-between align-items-center mb-5">
@@ -56,7 +228,7 @@
                                 <i class="fas fa-utensils fa-lg"></i>
                             </div>
                             <div>
-                                <h6 class="mb-0 fw-bold">Food Selection</h6>
+                                <h6 class="mb-0 fw-bold">Food Basket</h6>
                                 <small class="text-muted" th:text="${order.orderDate}">Jan 28, 2026</small>
                             </div>
                         </div>
@@ -67,9 +239,10 @@
                     </div>
 
                     <div class="card-footer bg-white border-0 pb-3 pt-0">
-                        <button class="btn btn-outline-success btn-sm w-100 rounded-pill fw-bold mt-2">
-                            <i class="fas fa-file-invoice me-1"></i> DOWNLOAD INVOICE
-                        </button>
+						<button class="btn btn-outline-success btn-sm w-100 rounded-pill fw-bold mt-2"
+						                                    th:onclick="printInvoice([[${order.id}]], [[${order.totalAmount}]], [[${order.status}]], [[${order.orderDate}]])">
+						                                <i class="fas fa-file-invoice me-1"></i> VIEW INVOICE
+						                            </button>
                     </div>
                 </div>
             </div>
@@ -84,5 +257,59 @@
                 </div>
             </div>
 
-        </div> </div> </body>
+        </div> </div> 
+		<script>
+		    function printInvoice(id, amount, status, date) {
+		        // Create a fake receipt window
+		        let printWindow = window.open('', '', 'height=600,width=400');
+		        
+		        let html = `
+		            <html>
+		            <head>
+		                <title>Invoice #ORD-${id}</title>
+		                <style>
+		                    body { font-family: monospace; padding: 20px; text-align: center; }
+		                    .header { border-bottom: 2px dashed #000; padding-bottom: 10px; margin-bottom: 20px; }
+		                    .footer { border-top: 2px dashed #000; padding-top: 10px; margin-top: 20px; font-size: 12px; }
+		                    .total { font-size: 20px; font-weight: bold; margin: 20px 0; }
+		                    .status { border: 1px solid #000; padding: 5px; display: inline-block; margin-bottom: 10px; }
+		                </style>
+		            </head>
+		            <body>
+		                <div class="header">
+		                    <h2>FOODSLICE</h2>
+		                    <p>Mumbai, India</p>
+		                    <p>--------------------------------</p>
+		                    <h3>INVOICE</h3>
+		                </div>
+		                
+		                <p><strong>Order ID:</strong> #ORD-${id}</p>
+		                <p><strong>Date:</strong> ${date}</p>
+		                
+		                <div class="status">STATUS: ${status}</div>
+		                
+		                <div class="total">TOTAL: ₹${amount}</div>
+		                
+		                <p>Payment Mode: Online/Cash</p>
+		                
+		                <div class="footer">
+		                    <p>Thank you for ordering!</p>
+		                    <p>www.foodslice.com</p>
+		                </div>
+		                
+		                <script>
+		                    window.print();
+		                </script>
+		            </body>
+		            </html>
+		        `;
+		        
+		        printWindow.document.write(html);
+		        printWindow.document.close();
+		    }
+		</script>
+
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+		</body>
 </html>
+-->

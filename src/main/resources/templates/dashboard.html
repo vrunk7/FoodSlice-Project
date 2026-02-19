@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>FoodApp Pro</title>
+    <title>FoodSlice | Dashboard</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -60,6 +60,8 @@
 	        <span id="cartBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
 	    </button>
 		
+		
+		
     <div class="sidebar d-none d-md-block">
         <h3 class="fw-bold mb-5 ps-2" style="color: #2e7d32;"><i class="fas fa-leaf"></i> FoodSlice</h3>
         <nav class="nav flex-column">
@@ -74,6 +76,11 @@
     </div>
 
     <div class="main-content">
+		<div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show mx-4 mt-3 margin-left: 250px" role="alert">
+				    <i class="fas fa-exclamation-triangle me-2"></i>
+				    <span th:text="${param.error}">Error message</span>
+				    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+				</div>
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div><h2 class="fw-bold">Welcome, <span th:text="${username}">User</span>! 👋</h2></div>
             <form action="/dashboard" method="get" class="d-flex align-items-center">
@@ -276,7 +283,43 @@
 	    </div>
 	</div>
 	
+	<div class="modal fade" id="orderSuccessModal" tabindex="-1" aria-hidden="true">
+	    <div class="modal-dialog modal-dialog-centered">
+	        <div class="modal-content text-center p-4 border-0 shadow-lg rounded-4">
+	            <div class="modal-body">
+	                <div class="mb-3">
+	                    <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+	                </div>
+	                <h3 class="fw-bold text-dark">Order Placed!</h3>
+	                <p class="text-muted">Your food is being prepared and will be on its way shortly.</p>
+	                <div class="d-grid gap-2 mt-4">
+	                    <a href="/my-orders" class="btn btn-success fw-bold rounded-pill py-2">
+	                        Track Order
+	                    </a>
+	                    <button type="button" class="btn btn-light rounded-pill py-2" data-bs-dismiss="modal">
+	                        Continue Ordering
+	                    </button>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+	
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	<script>
+	    // Check if URL has "?orderSuccess=true"
+	    const urlParams = new URLSearchParams(window.location.search);
+	    if (urlParams.get('orderSuccess') === 'true') {
+	        // Wait for Bootstrap to load, then show modal
+	        window.addEventListener('load', function() {
+	            var myModal = new bootstrap.Modal(document.getElementById('orderSuccessModal'));
+	            myModal.show();
+	            
+	            // Optional: Clean the URL so refreshing doesn't show it again
+	            window.history.replaceState(null, null, window.location.pathname);
+	        });
+	    }
+	</script>
     <script>
         let currentPrice = 0;
 
@@ -479,5 +522,21 @@
 		            .catch(err => console.error("Error:", err));
 		        }
     </script>
+	<script>
+	    // 1. Push a "fake" state into history so the Back button has something to pop
+	    history.pushState(null, null, location.href);
+
+	    // 2. Listen for the Back Button click
+	    window.onpopstate = function () {
+	        // 3. Show the Confirmation Dialog
+	        if (confirm("Do you want to logout?")) {
+	            // If YES, go to the logout URL (which kills the session)
+	            window.location.href = "/logout";
+	        } else {
+	            // If NO, push the fake state again so they stay on the page
+	            history.pushState(null, null, location.href);
+	        }
+	    };
+	</script>
 </body>
 </html>

@@ -31,19 +31,20 @@
            data-bs-target="#profileSidebar">
             <i class="fas fa-wallet"></i> Wallet
         </a>
-		<div class="mt-4 pt-3 border-top" th:if="${role == 'ADMIN'}">
-		    
-		    <a th:href="@{/admin/dashboard(username=${username})}" 
-		       class="btn btn-warning w-100 fw-bold shadow-sm text-dark">
-		        <i class="fas fa-user-shield me-2"></i> Back to Admin
-		    </a>
-		    
-		    <div class="text-center mt-2">
-		        <span class="badge bg-danger-subtle text-danger border border-danger" style="font-size: 0.65rem;">
-		            TESTING MODE
-		        </span>
-		    </div>
-		</div>
+
+        <div class="mt-4 pt-3 border-top" th:if="${role == 'ADMIN'}">
+            
+            <a href="/admin/dashboard" 
+               class="btn btn-warning w-100 fw-bold shadow-sm text-dark">
+                <i class="fas fa-user-shield me-2"></i> Back to Admin
+            </a>
+            
+            <div class="text-center mt-2">
+                <span class="badge bg-danger-subtle text-danger border border-danger" style="font-size: 0.65rem;">
+                    ADMIN MODE ACTIVE
+                </span>
+            </div>
+        </div>
 
         <div class="mt-5">
             <a class="nav-link text-danger" href="/logout">
@@ -52,3 +53,14 @@
         </div>
     </nav>
 </div>
+
+<script>
+    history.pushState(null, null, location.href);
+    window.onpopstate = function () {
+        if (confirm("Do you want to logout?")) {
+            window.location.href = "/logout";
+        } else {
+            history.pushState(null, null, location.href);
+        }
+    };
+</script>

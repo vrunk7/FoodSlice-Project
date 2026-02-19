@@ -1,27 +1,105 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Register</title>
+    <title>Sign Up | FoodSlice</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-</head>
-<body class="bg-light d-flex align-items-center justify-content-center" style="height: 100vh;">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 1. PROFESSIONAL BACKGROUND IMAGE */
+        body { 
+            /* This loads a nice food background and darkens it slightly so the card pops */
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                        url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            font-family: 'Segoe UI', sans-serif;
+            height: 100vh;
+        }
+        
+        /* 2. GLASS/CARD STYLING */
+        .register-card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            background: rgba(255, 255, 255, 0.95); /* Slight transparency */
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
 
-    <div class="card shadow p-4" style="width: 400px;">
-        <h3 class="text-center mb-4">Register</h3>
+        /* 3. BRANDING */
+        .brand-logo {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #2e7d32;
+            letter-spacing: -1px;
+        }
+
+        /* 4. INPUT FIELDS */
+        .form-control {
+            border-radius: 10px;
+            padding: 12px 15px 12px 45px; /* Space for icon */
+            border: 1px solid #e0e0e0;
+            background-color: #f8f9fa;
+        }
+        .form-control:focus {
+            box-shadow: none;
+            border-color: #2e7d32;
+            background-color: white;
+        }
+        .input-icon {
+            position: absolute;
+            top: 50%; /* Center vertically */
+            left: 15px;
+            transform: translateY(-50%); /* Perfect centering */
+            color: #adb5bd;
+            z-index: 10;
+        }
+
+        /* 5. BUTTONS */
+        .btn-register {
+            border-radius: 10px;
+            padding: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            transition: 0.3s;
+        }
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 125, 50, 0.3);
+        }
+    </style>
+</head>
+<body class="d-flex align-items-center justify-content-center">
+
+    <div class="card register-card p-4 p-md-5" style="width: 400px;">
+        
+        <div class="text-center mb-4">
+            <div class="brand-logo mb-1">
+                <i class="fas fa-leaf me-2"></i>FoodSlice
+            </div>
+            <p class="text-muted small">Join us and start ordering delicious food!</p>
+        </div>
 
         <form action="/register" method="post">
-            <div class="mb-3">
-                <label>Username</label>
-                <input type="text" name="username" class="form-control" required>
+            
+            <div class="mb-3 position-relative">
+                <i class="fas fa-user input-icon"></i>
+                <input type="text" name="username" class="form-control" placeholder="Choose a Username" required autofocus>
             </div>
-            <div class="mb-3">
-                <label>Password</label>
-                <input type="password" name="password" class="form-control" required>
+
+            <div class="mb-4 position-relative">
+                <i class="fas fa-lock input-icon"></i>
+                <input type="password" name="password" class="form-control" placeholder="Create Password" required>
             </div>
-            <button type="submit" class="btn btn-success w-100">Sign Up</button>
+
+            <button type="submit" class="btn btn-success w-100 btn-register mb-3">
+                CREATE ACCOUNT <i class="fas fa-user-plus ms-2"></i>
+            </button>
         </form>
+
         <div class="text-center mt-3">
-            <a href="/">Already have an account? Login</a>
+            <p class="small text-muted mb-0">Already have an account?</p>
+            <a href="/" class="fw-bold text-success text-decoration-none">Login Here</a>
         </div>
     </div>
 

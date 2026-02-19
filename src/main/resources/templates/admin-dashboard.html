@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Admin Inventory | FoodSlice</title>
+    <title>FoodSlice | Admin</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
         
         /* ADMIN SIDEBAR STYLE (Dark Theme) */
-        .sidebar { height: 100vh; position: fixed; top: 0; left: 0; width: 260px; background: #212529; padding: 25px; color: white; }
+        .sidebar { height: 100vh; position: fixed; top: 0; left: 0; width: 260px; background: #212529; padding: 25px; color: white; overflow-y: auto; }
         .nav-link { color: rgba(255,255,255,0.7); margin-bottom: 8px; padding: 12px; border-radius: 8px; transition: 0.3s; }
         .nav-link:hover, .nav-link.active { background-color: rgba(255, 193, 7, 0.15); color: #ffc107; }
-        
+
         /* MAIN CONTENT STYLE */
         .main-content { margin-left: 260px; padding: 40px; }
         
@@ -201,6 +201,14 @@
             }
         }
     </script>
+	<script>
+	    window.addEventListener("pageshow", function (event) {
+	        if (event.persisted) {
+	            window.location.reload();
+	        }
+	    });
+	</script>
+
 
 </body>
 </html>

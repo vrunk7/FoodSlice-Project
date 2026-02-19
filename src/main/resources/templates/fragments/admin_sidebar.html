@@ -5,7 +5,7 @@
     </h3>
     
     <nav class="nav flex-column">
-        
+
         <a class="nav-link" 
            th:classappend="${currentPage == 'inventory'} ? 'active' : ''" 
            href="/admin/dashboard">
@@ -27,19 +27,27 @@
         </a>
 
         <div class="mt-5 pt-4 border-top border-secondary">
-            <small class="text-uppercase text-muted fw-bold ls-1">Testing Zone</small>
-            <a th:href="@{/dashboard(username=${username})}" class="btn btn-outline-warning w-100 btn-sm mt-3 text-start">
-                <i class="fas fa-eye me-2"></i> View As User
+            <a href="/dashboard"
+               class="btn btn-outline-warning w-100 btn-sm mt-3 text-start">
+               <i class="fas fa-eye me-2"></i> View As User
             </a>
-            <div class="mt-2 text-muted small fst-italic">
-                <i class="fas fa-info-circle"></i> Switches to User App view for testing.
-            </div>
         </div>
         
-        <div class="mt-4">
+        <div class="mt-auto pt-4 border-top border-secondary">
             <a class="nav-link text-danger" href="/logout">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </a>
         </div>
     </nav>
 </div>
+
+<script>
+    history.pushState(null, null, location.href);
+    window.onpopstate = function () {
+        if (confirm("Do you want to logout from Admin Panel?")) {
+            window.location.href = "/logout";
+        } else {
+            history.pushState(null, null, location.href);
+        }
+    };
+</script>

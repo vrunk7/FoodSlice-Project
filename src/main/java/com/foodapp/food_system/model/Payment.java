@@ -14,8 +14,16 @@ public class Payment {
     private Double amount;
     private String status;     // SUCCESS
     private LocalDateTime timestamp = LocalDateTime.now();
-
-    // Manual Getters/Setters
+    @Column(name = "payment_mode") // This maps to your database column
+    private String paymentMode;
+    
+    public String getPaymentMode() {	
+		return paymentMode;
+	}
+	public void setPaymentMode(String paymentMode) {
+		this.paymentMode = paymentMode;
+	}
+	// Manual Getters/Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Long getOrderId() { return orderId; }

@@ -1,0 +1,39 @@
+<div th:fragment="wallet" class="offcanvas offcanvas-end" tabindex="-1" id="profileSidebar">
+    <div class="offcanvas-header bg-success text-white">
+        <h5 class="offcanvas-title"><i class="fas fa-user-circle me-2"></i>My Account</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body text-center">
+        <div class="mb-3">
+            <img th:src="'https://ui-avatars.com/api/?name=' + ${username} + '&background=198754&color=fff&size=128'" 
+                 class="rounded-circle shadow" width="100">
+        </div>
+        <h4 class="fw-bold" th:text="${username}">User</h4>
+        <span class="badge bg-success-subtle text-success border border-success mb-4">Premium Member</span>
+
+        <div class="card border-0 shadow-sm bg-light mb-4">
+            <div class="card-body">
+                <p class="text-muted mb-1 small fw-bold">WALLET BALANCE</p>
+                <h2 class="fw-bold text-success mb-3" th:text="'₹' + ${walletBalance}">₹0.0</h2>
+                
+                <form action="/wallet/add" method="post" class="d-flex gap-2">
+                    <input type="hidden" name="username" th:value="${username}">
+                    <input type="number" name="amount" class="form-control" placeholder="Amount" required>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-plus"></i></button>
+                </form>
+            </div>
+        </div>
+
+        <div class="list-group list-group-flush text-start">
+            <a href="/my-orders" class="list-group-item list-group-item-action border-0 py-3">
+                <i class="fas fa-receipt me-3 text-muted"></i> My Orders
+            </a>
+            <a href="/wishlist" class="list-group-item list-group-item-action border-0 py-3">
+                <i class="fas fa-heart me-3 text-muted"></i> My Wishlist
+            </a>
+            <a href="/logout" class="list-group-item list-group-item-action border-0 py-3 text-danger">
+                <i class="fas fa-sign-out-alt me-3"></i> Logout
+            </a>
+        </div>
+    </div>
+</div>
